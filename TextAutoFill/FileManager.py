@@ -14,14 +14,12 @@ def gettabs(line: str) -> int:
     return floor(r)
 
 def checktabs(line: str, tabs: int) -> int:
-    tabs = tabs * 2 - gettabs(line)
-    if tabs == 0: return 0
-    if tabs < 0: return -1
-    return 1
+    return tabs - gettabs(line)
 
-def searchpath(arg: str) -> int:
+def searchpath(arg: str, line: int = 0) -> int:
     arg = __fixarg(arg)
-    line = 0
+    if arg == '':
+        return -1
     tabs = 0
 
     with open(path, 'r') as f:
@@ -36,22 +34,25 @@ def searchpath(arg: str) -> int:
         elif ctabs == 0:
             text = text.replace(' ' * 2 * tabs, '')
             if text.split(':')[0] == arg[tabs]:
-                tabs += 1
-                if tabs == len(arg):
+                if tabs < len(arg)-1:
+                    tabs += 1
+                if tabs == len(arg)-1:
                     return line
         line += 1
     return -1
 
-def getendpath(arg: str) -> int:
+def getendpath(arg: str, line: int = 0) -> int:
     with open(path, 'r') as f:
         data = f.readlines()
 
-    line = searchpath(arg) + 1
-    if line > len(data)-1: return line
+    line = searchpath(arg, line) + 1
+    l = len(data)-1
+    if line > l: return line
     tabs = arg.count('.')
 
     while checktabs(data[line], tabs) < 0:
         line += 1
+        if line > l: break
     return line
 
 def readvalue(arg: str) -> int:
@@ -64,29 +65,44 @@ def readvalue(arg: str) -> int:
 
     return int(data[line].replace(' ', '').split(':')[1])
 
+def insertvalue(data: list[str], line: int, tabs: int, arg: str, value: int = None) -> list[str]:
+    #print(line)
+    tmp = ' ' * 2 * tabs + arg
+    if value is not None:
+        data.insert(line, tmp + ': ' + str(value))
+    else:
+        data.insert(line, tmp + ':\n')
+    return data
+
 def writevalue(arg: str, value: int):
     arg = __fixarg(arg)
+    if arg == '':
+        return
 
     with open(path, 'r') as f:
         data = f.readlines()
 
     sarg = ''
+    line = 0
     tabs = 0
     for i in arg:
         parg = sarg
         if tabs == 0: sarg = i
         else: sarg = sarg + '.' + i
 
-        line = searchpath(sarg)
-        if line == -1:
-            if len(arg) == tabs:
-                data.insert(getendpath(sarg), ' ' * 2 * tabs + i+': '+str(value))
-                return
+        if searchpath(sarg, line) == -1:
+            if len(arg)-1 == tabs:
+                data = insertvalue(data, getendpath(parg, line), tabs, i, value)
+                break
             else:
-                data.insert(getendpath(parg), ' ' * 2 * tabs + i+':\n')
+                line = getendpath(sarg, line)
+                data = insertvalue(data, line, tabs, i)
+        else:
+            line = getendpath(sarg, line)
+        print(line)
         tabs += 1
 
     with open(path, 'w+') as f:
         f.writelines(data)
 
-writevalue('a.d', 2)
+writevalue('a.d.d', 2)
