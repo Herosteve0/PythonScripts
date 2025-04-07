@@ -9,3 +9,6 @@ def NumberToLetter(a: int) -> chr:
     r = a+65
     if a >= 26: r += 6
     return chr(r)
+
+print(ord('\n'))
+print(97+25)

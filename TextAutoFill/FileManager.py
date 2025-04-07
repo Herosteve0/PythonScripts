@@ -60,6 +60,7 @@ def readvalue(arg: str) -> int:
         data = f.readlines()
 
     line = searchpath(arg)
+    print(line)
 
     if len(data) < line: return None
 
@@ -105,4 +106,5 @@ def writevalue(arg: str, value: int):
     with open(path, 'w+') as f:
         f.writelines(data)
 
-writevalue('a.d.d', 2)
+print(readvalue('a.a.a.d'))
+#writevalue('a.d.d', 2)

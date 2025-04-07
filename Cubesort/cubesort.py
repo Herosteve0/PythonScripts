@@ -59,21 +59,29 @@ def Visualize(data: str) -> None:
     print()
     l = len(rows)
     for i in range(max, 0, -1):
-        tmp = ''
+        tmp = ['', '', '']
         for j in range(l):
             if len(rows[j]) <= i-1:
-                tmp = tmp + '   '
+                for k in range(3): tmp[k] = tmp[k] + '       '
             else:
-                tmp = tmp + ' ' + rows[j][i-1].upper() + ' '
-        print(tmp)
+                tmp[0] = tmp[0] + '┌─────┐'
+                tmp[1] = tmp[1] + '│  ' + rows[j][i-1].upper() + '  │'
+                tmp[2] = tmp[2] + '└─────┘'
+        for j in range(3): print(tmp[j])
+    print()
+
+def GetTops(data: str) -> list[str]:
+    if len(data) == 0: return []
+    r = [data[-1]]
+    for i in range(len(data)):
+        if data[i] == ' ':
+            r.append(data[i-1])
+    return r
 
 def CalcPossibleActions(data: str) -> str:
     rows = data.split(' ')
-    movable = []
     l = len(rows)
-    for i in range(l):
-        if len(rows[i]) <= 0: continue
-        movable.append(rows[i][-1])
+    movable = GetTops(data)
 
     r = []
     for c in movable:
@@ -95,7 +103,7 @@ def FixState(state: str) -> str:
 
 def CompareState(data: str, enddata: str) -> int:
     blocks = len(enddata.replace(' ', ''))
-    correct = 0
+    correct = mistakes = 0
 
     rows = sorted(data.split(' '))
     endrows = sorted(enddata.split(' '))
@@ -103,13 +111,12 @@ def CompareState(data: str, enddata: str) -> int:
     l = len(rows)
     el = len(endrows)
 
-    loop1 = min(l, el)
-    for i in range(loop1):
-        loop2 = min(len(rows[i]), len(endrows[i]))
-        for j in range(loop2):
-            if rows[i][j] != endrows[i][j]:
-                break
-            correct += 1
+    for i1 in range(l):
+        for i2 in range(el):
+            loops = min(len(rows[i1]), len(endrows[i2]))
+            for j in range(loops):
+                if rows[i1][j] != endrows[i2][j]: break
+                correct += 1
 
     return correct/blocks*100
 
@@ -137,7 +144,7 @@ def solve(state: list[str], oldmemory: list[str] = [], count: int = 0):
     if count == 1000:
         return [errors[0], count, memory]
 
-    #printstateinfo(state)
+    printstateinfo(state)
 
     for i in c:
         if i in memory: continue
@@ -147,18 +154,22 @@ def solve(state: list[str], oldmemory: list[str] = [], count: int = 0):
             return tmp
     return [errors[1], count, memory]
 
+n = 10
+if n == -1:
+    d = ["cba ed", "ae c db"]
+else:
+    if n == 0: n = rnd(0, 26)
+    s = GenerateBlocks(n)
+    f = GenerateBlocks(n)
+    d = [s, f]
 
-#a = solve(["cba ed", "ae c db"])
-
-n = rnd(0, 26)
-s = GenerateBlocks(n)
-f = GenerateBlocks(n)
-print("Problem:", s, "→", f)
-
+print("Problem:", d[0], "→", d[1])
 starttime = time()
-a = solve([s, f])
+a = solve(d)
 
 print("Final result:", a[0])
 print("Steps required:", a[1])
 print("Steps took:", a[2])
 print("Time elapsed", round(time() - starttime, 4))
+
+for i in a[2]: Visualize(i)
