@@ -1,0 +1,7 @@
+li x0, 5
+li x1, 10
+
+add x2, x0, x1
+xor x3, x0, x1
+
+sub x4, x3, x2
