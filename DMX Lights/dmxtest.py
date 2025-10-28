@@ -1,24 +1,25 @@
-IP = '62.74.9.219'
+import DMXI
+from KingPar3 import KingPar3
+from LEDBar import LEDBar13
+import time
 
-from pyartnet import ArtNetNode
-import asyncio
+ms = 1/1000
 
-from Par0 import Par0
+def main():
+    if not DMXI.CheckDevices(): return
+    interface = DMXI.DMXInterface(0)
 
-async def main():
-    node = ArtNetNode(IP, 6454)
-    light1 = Par0(node, 0, 0)
-    node.start_refresh()
+    light = LEDBar13(interface, 50)
 
-    light1.setFade(255, 1)
-    light1.setColor(red=255, timespan=5)
-    await asyncio.sleep(3)
-    light1.setColor(blue=255, timespan=2)
+    interface.start()
 
-    await asyncio.sleep(2)
+    light.setPosY(128)
+    light.setDimmer(255)
+    light.setStrobo(0)
 
-    light1.blackout()
+    time.sleep(5)
 
-    node.stop_refresh()
+    interface.stop()
 
-asyncio.run(main())
+if __name__ == '__main__':
+    main()

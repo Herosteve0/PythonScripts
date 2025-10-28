@@ -1,15 +1,12 @@
 class DMXLight:
-    def __init__(self, node, _universe: int, start_channel: int, fixtures: int):
+    def __init__(self, dmxhub, start_channel: int, fixtures: int):
+        self.dmxhub = dmxhub
         self.start_channel = start_channel
+        self.fixtures_length = fixtures
 
-        universe = node.add_universe(_universe)
-        self.fixtures = [
-            universe.add_channel(start=start_channel+i+1, width=1) for i in range(fixtures)
-            ]
-
-    def setFixture(self, fixture: int, value: int, timespan: float = 0):
-        self.fixtures[fixture].add_fade([value], timespan)
+    def setFixture(self, fixture: int, value: int):
+        self.dmxhub.set_channel(self.start_channel + fixture - 1, value)
 
     def reset(self):
-        for fixture in self.fixtures:
-            fixture.add_fade([0], 0)
+        for i in range(self.fixtures_length):
+            self.dmxhub.set_channel(i, 0)
